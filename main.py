@@ -5,9 +5,7 @@ def main():
     eventCode = "USMAREQ"
     season = 2025
     matches = request.get_qual_matches(eventCode, season)
-    # print(matches)
     teams = request.get_teams(eventCode, season)
-    # print(teams)
 
     matches_matrix = np.zeros((len(matches)*2, len(teams)))
     scores = np.zeros(len(matches)*2)
@@ -23,9 +21,10 @@ def main():
             else:
                 matches_matrix[match_index*2+1][team_index] = 1
                 scores[match_index*2+1] = blue_score
-    print(matches_matrix)
-    print(scores)
 
+    opr = np.linalg.lstsq(matches_matrix, scores, rcond=None)[0]
+    for team_index, team_number in enumerate(teams):
+        print(f"Team {team_number}: {opr[team_index]:.2f} OPR")
 
 
 

@@ -29,7 +29,6 @@ def make_request(eventCode, season) -> dict:
               teams {{
                 alliance
                 teamNumber
-                surrogate
               }}
               tournamentLevel
             }}

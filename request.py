@@ -100,4 +100,4 @@ def get_teams(eventCode, season) -> list:
 
     teams = [team.get("teamNumber") for team in teams_list]
     
-    return list(teams)
+    return teams

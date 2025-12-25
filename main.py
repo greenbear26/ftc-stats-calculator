@@ -1,10 +1,9 @@
 import request
 import numpy as np
 import pandas as pd
+import sys
 
-def main():
-    eventCode = "USMAREQ"
-    season = 2025
+def main(eventCode, season):
     matches = request.get_qual_matches(eventCode, season)
     teams = request.get_teams(eventCode, season)
 
@@ -38,7 +37,14 @@ def main():
         'DPR': dpr,
         'CCWM': ccwm
     })
-    print(team_frame.sort_values(by='DPR', ascending=True, ignore_index=True))
+    print(team_frame.sort_values(by='CCWM', ascending=False,
+                                 ignore_index=True).head(50))
 
 if __name__ == "__main__":
-    main()
+
+    if len(sys.argv) < 3:
+        print("Usage: python main.py <eventCode> <season>")
+        sys.exit(1)
+    eventCode = sys.argv[1]
+    season = int(sys.argv[2])
+    main(eventCode, season)

@@ -11,13 +11,14 @@ def make_request(eventCode, season) -> dict:
     Returns:
         dict: The JSON response from the API.
     """
+    statsQuery = str(season)+"Trad"if season==2020 or season==2021 else season
 
     query = f"""
         query Query($season: Int!, $code: String!) {{
           eventByCode(season: $season, code: $code) {{
             matches {{
               scores {{
-                ... on MatchScores2025 {{
+                ... on MatchScores{statsQuery} {{
                   red {{
                     totalPointsNp
                   }}

@@ -77,8 +77,11 @@ def main(eventCode, season, min_team_index):
                      len(team_opponents[team]) == 0]
     team_frame = team_frame[~team_frame['Team'].isin(no_show_teams)]
 
+    # Sort and Print
     print(team_frame.sort_values(by='CCWM', ascending=False,
                                  ignore_index=True))
+    # Event Averages
+    print(f"\nEvent Average OPR: {team_frame['OPR'].mean():.2f}")
 
     # Graph
     max_data = team_frame[team_frame.index >= min_team_index].head(10)

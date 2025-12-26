@@ -2,11 +2,14 @@ import request
 import numpy as np
 import pandas as pd
 import sys
+import matplotlib.pyplot as plt
 
-def main(eventCode, season):
+def main(eventCode, season, min_team_index):
+    # Data Fetching
     matches = request.get_qual_matches(eventCode, season)
     teams = request.get_teams(eventCode, season)
 
+    # Matrix Construction
     matches_matrix = np.zeros((len(matches)*2, len(teams)))
     offense_scores = np.zeros(len(matches)*2)
     defense_scores = np.zeros(len(matches)*2)
@@ -34,13 +37,14 @@ def main(eventCode, season):
                 defense_scores[match_index*2+1] = red_score
                 team_opponents[team_number].extend(red_teams)
 
-
+    # OPR/DPR/CCWM Calculation
     opr = np.linalg.lstsq(matches_matrix, offense_scores, rcond=None)[0]
     opr = np.round(opr, 2)
     dpr = np.linalg.lstsq(matches_matrix, defense_scores, rcond=None)[0]
     dpr = np.round(dpr, 2)
     ccwm = opr - dpr
 
+    # Average Opponent Stats Calculation
     avg_opponents_opr = []
     avg_opponents_dpr = []
     avg_opponents_ccwm = []
@@ -56,6 +60,9 @@ def main(eventCode, season):
         avg_opponents_dpr.append(np.round(np.mean(dpr[opponent_indices]), 2))
         avg_opponents_ccwm.append(np.round(np.mean(ccwm[opponent_indices]), 2))
 
+    # Data Presentation
+    pd.set_option('display.max_rows', None)
+
     team_frame = pd.DataFrame({
         'Team': teams,
         'OPR': opr,
@@ -70,14 +77,26 @@ def main(eventCode, season):
                      len(team_opponents[team]) == 0]
     team_frame = team_frame[~team_frame['Team'].isin(no_show_teams)]
 
-    print(team_frame.sort_values(by='Avg Opp CCWM', ascending=False,
-                                 ignore_index=True).head(50))
+    print(team_frame.sort_values(by='CCWM', ascending=False,
+                                 ignore_index=True))
+
+    # Graph
+    max_data = team_frame[team_frame.index >= min_team_index].head(10)
+
+    ax = max_data.plot(x='Team', y=team_frame.columns[1:], kind='bar')
+
+    ax.title.set_text(f'Team Stats for Event {eventCode} ({season})')
+
+    plt.show()
+
+
 
 if __name__ == "__main__":
 
     if len(sys.argv) < 3:
-        print("Usage: python main.py <eventCode> <season>")
+        print("Usage: python main.py <eventCode> <season> <min_team_index>")
         sys.exit(1)
     eventCode = sys.argv[1]
     season = int(sys.argv[2])
-    main(eventCode, season)
+    min_team_index = 0 if len(sys.argv) < 4 else int(sys.argv[3])
+    main(eventCode, season, min_team_index)

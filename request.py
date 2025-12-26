@@ -59,7 +59,6 @@ def make_request(eventCode, season) -> dict:
         # Check if the request was successful (status code 201 Created)
         if response.status_code == 200:
             data = response.json()
-            print("POST Request Successful:")
         else:
             print(f"Error: {response.status_code}")
 
@@ -78,7 +77,12 @@ def get_qual_matches(eventCode, season) -> list:
         list: A list of qualification matches, in dictionary format.
     """
 
-    matches = make_request(eventCode, season).get("data", {})\
+    matches = make_request(eventCode, season)
+
+    if matches is None:
+        return []
+
+    matches = matches.get("data", {})\
         .get("eventByCode", {}).get("matches", [])
 
     qual_matches = [match for match in matches if match.get("tournamentLevel")
@@ -95,7 +99,12 @@ def get_teams(eventCode, season) -> list:
         list: A list of teams, by team number
     """
 
-    teams_list = make_request(eventCode, season).get("data", {})\
+    teams_list = make_request(eventCode, season)
+    
+    if teams_list is None:
+        return []
+
+    teams_list = teams_list.get("data", {})\
         .get("eventByCode", {}).get("teams", [])
 
     teams = [team.get("teamNumber") for team in teams_list]

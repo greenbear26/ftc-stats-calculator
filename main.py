@@ -4,7 +4,7 @@ import pandas as pd
 import sys
 import matplotlib.pyplot as plt
 
-def main(eventCode, season, min_team_index):
+def main(eventCode, season, sort_key, ascending):
     # Data Fetching
     matches = request.get_qual_matches(eventCode, season)
     teams = request.get_teams(eventCode, season)
@@ -83,29 +83,29 @@ def main(eventCode, season, min_team_index):
     team_frame = pd.DataFrame({
         'Team': teams,
         'OPR': opr,
-        # 'DPR': dpr,
-        # 'CCWM': ccwm,
+        'DPR': dpr,
+        'CCWM': ccwm,
         'Avg Opp OPR': avg_opponents_opr,
-        # 'Avg Opp DPR': avg_opponents_dpr,
-        # 'Avg Opp CCWM': avg_opponents_ccwm,
+        'Avg Opp DPR': avg_opponents_dpr,
+        'Avg Opp CCWM': avg_opponents_ccwm,
         'Avg Partner OPR': avg_partners_opr,
-        # 'Avg Partner DPR': avg_partners_dpr,
-        # 'Avg Partner CCWM': avg_partners_ccwm
+        'Avg Partner DPR': avg_partners_dpr,
+        'Avg Partner CCWM': avg_partners_ccwm
     })
 
     team_frame['Match OPR Diff'] = 2*team_frame['Avg Opp OPR'] \
         - team_frame['Avg Partner OPR']
-    # team_frame['Match DPR Diff'] = 2*team_frame['Avg Opp DPR'] \
-    #     - team_frame['Avg Partner DPR']
-    # team_frame['Match CCWM Diff'] = 2*team_frame['Avg Opp CCWM'] \
-    #     - team_frame['Avg Partner CCWM']
+    team_frame['Match DPR Diff'] = 2*team_frame['Avg Opp DPR'] \
+        - team_frame['Avg Partner DPR']
+    team_frame['Match CCWM Diff'] = 2*team_frame['Avg Opp CCWM'] \
+        - team_frame['Avg Partner CCWM']
 
     no_show_teams = [team for team in teams if
                      len(team_opponents[team]) == 0]
     team_frame = team_frame[~team_frame['Team'].isin(no_show_teams)]
 
     # Sort and Print
-    print(team_frame.sort_values(by='Match OPR Diff', ascending=False,
+    print(team_frame.sort_values(by=sort_key, ascending=ascending,
                                  ignore_index=True))
     # Event Averages
     # print(f"\nEvent Average OPR: {team_frame['OPR'].mean():.2f}")
@@ -124,9 +124,10 @@ def main(eventCode, season, min_team_index):
 if __name__ == "__main__":
 
     if len(sys.argv) < 3:
-        print("Usage: python main.py <eventCode> <season> <min_team_index>")
+        print("Usage: python main.py <eventCode> <season> optional: <sort_key> <ascending>")
         sys.exit(1)
     eventCode = sys.argv[1]
     season = int(sys.argv[2])
-    min_team_index = 0 if len(sys.argv) < 4 else int(sys.argv[3])
-    main(eventCode, season, min_team_index)
+    sort_key = sys.argv[3] if len(sys.argv) > 3 else 'OPR'
+    ascending = sys.argv[4].lower() == 'true' if len(sys.argv) > 4 else False
+    main(eventCode, season, sort_key, ascending)

@@ -86,7 +86,8 @@ def get_qual_matches(eventCode, season) -> list:
         .get("eventByCode", {}).get("matches", [])
 
     qual_matches = [match for match in matches if match.get("tournamentLevel")
-        == "Quals"]
+        == "Quals" and match.get("scores") is not None]
+    print(qual_matches)
     return qual_matches
 
 def get_teams(eventCode, season) -> list:

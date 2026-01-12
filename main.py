@@ -93,20 +93,44 @@ def main(eventCode, season, sort_key, ascending):
         'Avg Partner CCWM': avg_partners_ccwm
     })
 
-    team_frame['Match OPR Diff'] = 2*team_frame['Avg Opp OPR'] \
+    team_frame['OPRe'] = 2*team_frame['Avg Opp DPR'] \
         - team_frame['Avg Partner OPR']
-    team_frame['Match DPR Diff'] = 2*team_frame['Avg Opp DPR'] \
+    team_frame['DPRe'] = 2*team_frame['Avg Opp OPR'] \
         - team_frame['Avg Partner DPR']
-    team_frame['Match CCWM Diff'] = 2*team_frame['Avg Opp CCWM'] \
+    team_frame['CCWMe'] = team_frame['OPRe'] - team_frame['DPRe']
+    team_frame['OPRreq'] = 2*team_frame['Avg Opp OPR'] \
+        - team_frame['Avg Partner OPR']
+    team_frame['DPRreq'] = 2*team_frame['Avg Opp DPR'] \
+        - team_frame['Avg Partner DPR']
+    team_frame['CCWMreq'] = 2*team_frame['Avg Opp CCWM'] \
         - team_frame['Avg Partner CCWM']
+    team_frame['OPR - OPRe'] = (team_frame['OPR'] - team_frame['OPRe']).round(2)
+    team_frame['DPR - DPRe'] = (team_frame['DPR'] - team_frame['DPRe']).round(2)
+    team_frame['CCWM - CCWMe'] = (team_frame['CCWM'] - team_frame['CCWMe']).round(2)
 
     no_show_teams = [team for team in teams if
                      len(team_opponents[team]) == 0]
     team_frame = team_frame[~team_frame['Team'].isin(no_show_teams)]
+    show_frame = team_frame[['Team', 'OPR', 'DPR', 'CCWM', 'OPRe', 'DPRe', 
+                             'CCWMe', 'OPR - OPRe', 'DPR - DPRe', 'CCWM - CCWMe',
+                             'OPRreq', 'DPRreq', 'CCWMreq']]
 
     # Sort and Print
-    print(team_frame.sort_values(by=sort_key, ascending=ascending,
+    print(show_frame.sort_values(by=sort_key, ascending=ascending,
                                  ignore_index=True))
+    print("\nValue Definitions:")
+    print("OPR: Offensive Power Rating")
+    print("DPR: Defensive Power Rating")
+    print("CCWM: Calculated Contribution to Winning Margin")
+    print("OPRe: Expected OPR based on opponents' DPR and partners' OPR")
+    print("DPRe: Expected DPR based on opponents' OPR and partners' DPR")
+    print("CCWMe: Expected CCWM based on OPERe and DPRe")
+    print("OPR - OPRe: Difference between actual OPR and expected OPR")
+    print("DPR - DPRe: Difference between actual DPR and expected DPR")
+    print("CCWM - CCWMe: Difference between actual CCWM and expected CCWM")
+    print("OPRreq: Minimum OPR to win based on opponents' OPR and partners' OPR")
+    print("DPRreq: Maximum DPR to win based on opponents' DPR and partners' DPR")
+    print("CCWMreq: Minimum CCWM to win based on opponents' CCWM and partners' CCWM")
     # Event Averages
     # print(f"\nEvent Average OPR: {team_frame['OPR'].mean():.2f}")
 
@@ -122,7 +146,6 @@ def main(eventCode, season, sort_key, ascending):
 
 
 if __name__ == "__main__":
-
     if len(sys.argv) < 3:
         print("Usage: python main.py <eventCode> <season> optional: <sort_key> <ascending>")
         sys.exit(1)
